@@ -554,7 +554,7 @@ class _DetailScreenState extends State<DetailScreen>
                   child: Row(
                     children: [
                       Container(
-                        width: 80,
+                        width: 96,
                         padding: const EdgeInsets.symmetric(
                           vertical: 8,
                           horizontal: 12,
@@ -563,16 +563,21 @@ class _DetailScreenState extends State<DetailScreen>
                           color: Theme.of(context).colorScheme.primaryContainer,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
-                          insight['time'] ?? '',
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                              ),
-                          textAlign: TextAlign.center,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            insight['time'] ?? '',
+                            maxLines: 1,
+                            softWrap: false,
+                            style: Theme.of(context).textTheme.labelMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
+                                ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
