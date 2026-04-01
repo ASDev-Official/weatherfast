@@ -30616,7 +30616,7 @@ $S:2}
 A.aD_.prototype={
 $1(a){var s=A.dD().b
 s=s==null?null:s.canvasKitBaseUrl
-return(s==null?"https://www.gstatic.com/flutter-canvaskit/e4b8dca3f1b4ede4c30371002441c88c12187ed6/":s)+a},
+return(s==null?"https://www.gstatic.com/flutter-canvaskit/425cfb54d01a9472b3e81d9e76fd63a4a44cfbcb/":s)+a},
 $S:48}
 A.Mo.prototype={
 a_8(){var s=this.agY(),r=$.bg.bW().ImageFilter.MakeColorFilter(s,null)
@@ -98773,11 +98773,11 @@ s=k.e
 if(s==null)s=k.c
 r=t.N
 q=t.z
-s=A.V(["title","Feature Request","subtitle","Suggest a new feature for WeatherFast","icon",B.HM,"color",j,"iconColor",s,"url","https://forms.gle/yWgLvBr2vMagmFbQ8"],r,q)
+s=A.V(["title","Feature Request","subtitle","Suggest a new feature for WeatherFast","icon",B.HM,"color",j,"iconColor",s,"url","https://asdev.fillout.com/wf-fr"],r,q)
 j=k.Q
 if(j==null)j=k.y
 p=k.as
-o=A.b([s,A.V(["title","Bug Report","subtitle","Report a bug or issue","icon",B.HU,"color",j,"iconColor",p==null?k.z:p,"url","https://forms.gle/vmdA2oyWtLtDu8jA8"],r,q)],t.H7)
+o=A.b([s,A.V(["title","Bug Report","subtitle","Report a bug or issue","icon",B.HU,"color",j,"iconColor",p==null?k.z:p,"url","https://asdev.fillout.com/wf-br"],r,q)],t.H7)
 j=A.aMT(!0,B.AW)
 s=A.B(a).ok.x
 s=A.aG("Support",l,l,l,s==null?l:s.iC(k.b,B.as),l,l)
