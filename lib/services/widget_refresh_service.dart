@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:workmanager/workmanager.dart';
@@ -61,6 +62,11 @@ class WidgetRefreshService {
       return;
     }
 
+    if (kIsWeb) {
+      _isInitialized = true;
+      return;
+    }
+
     await Workmanager().initialize(
       widgetRefreshCallbackDispatcher,
       isInDebugMode: false,
@@ -82,6 +88,10 @@ class WidgetRefreshService {
     required Map<String, dynamic> weatherData,
     required bool useFahrenheit,
   }) async {
+    if (kIsWeb) {
+      return;
+    }
+
     final locationName = (weatherData['location']?['name'] ?? '').toString();
     final condition =
         (weatherData['current']?['condition']?['text'] ?? 'Unknown').toString();
@@ -312,6 +322,10 @@ class WidgetRefreshService {
   }
 
   static Future<void> refreshFromBackground() async {
+    if (kIsWeb) {
+      return;
+    }
+
     final location = await HomeWidget.getWidgetData<String>(_kLocationQuery);
 
     if (location == null || location.isEmpty) {
@@ -359,6 +373,10 @@ class WidgetRefreshService {
   }
 
   static Future<void> _pushUpdate() async {
+    if (kIsWeb) {
+      return;
+    }
+
     await HomeWidget.updateWidget(
       androidName: 'WeatherFastSmallWidgetProvider',
     );
@@ -371,6 +389,10 @@ class WidgetRefreshService {
   }
 
   static Future<void> refreshWidgets() async {
+    if (kIsWeb) {
+      return;
+    }
+
     await _pushUpdate();
   }
 
