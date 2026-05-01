@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'weather_service_sg.dart';
 
 class WeatherService {
   final String _geoUrl = 'https://geocoding-api.open-meteo.com/v1/search';
@@ -16,6 +17,20 @@ class WeatherService {
       if (coords == null) {
         throw Exception('Location not found');
       }
+
+      // If location is in Singapore, delegate to Singapore service
+      try {
+        final lat = (coords['lat'] as num?)?.toDouble() ?? 0.0;
+        final lon = (coords['lon'] as num?)?.toDouble() ?? 0.0;
+        final country = (coords['country'] ?? '').toString().toLowerCase();
+        
+        final isSingaporeCoords = lat >= 1.15 && lat <= 1.50 && lon >= 103.55 && lon <= 104.15;
+        
+        if (country.contains('singapore') || isSingaporeCoords) {
+          final sg = SingaporeWeatherService();
+          return await sg.fetchWeatherFromCoords(lat, lon);
+        }
+      } catch (_) {}
 
       // Fetch weather data for those coordinates
       final weatherData = await _fetchWeatherData(coords['lat'], coords['lon']);
@@ -248,6 +263,82 @@ class WeatherService {
         throw Exception('Location not found');
       }
 
+      // If Singapore, use Singapore service to construct forecast
+      try {
+        final lat = (coords['lat'] as num?)?.toDouble() ?? 0.0;
+        final lon = (coords['lon'] as num?)?.toDouble() ?? 0.0;
+        final country = (coords['country'] ?? '').toString().toLowerCase();
+        
+        final isSingaporeCoords = lat >= 1.15 && lat <= 1.50 && lon >= 103.55 && lon <= 104.15;
+
+        if (country.contains('singapore') || isSingaporeCoords) {
+          final sg = SingaporeWeatherService();
+          final sgData = await sg.fetchWeatherFromCoords(lat, lon);
+          // Map SG widget_next_days to forecastday expected shape
+          final List<dynamic> forecastDays = [];
+          final days = (sgData['widget_next_days'] as List?) ?? const [];
+          final hourlyData = (sgData['widget_next_hours'] as List?) ?? const [];
+
+          for (int i = 0; i < days.length; i++) {
+            final d = days[i];
+            final dateStr = d['date'] ?? '';
+            final dayDate = DateTime.tryParse(dateStr);
+            
+            // Group hourly data for this day
+            final List<dynamic> dayHourly = [];
+            for (final h in hourlyData) {
+              final hTimeStr = h['time']?.toString() ?? '';
+              final hTime = DateTime.tryParse(hTimeStr);
+              
+              bool matches = false;
+              if (hTimeStr.startsWith(dateStr)) {
+                matches = true;
+              } else if (dayDate != null && hTime != null) {
+                matches = hTime.year == dayDate.year &&
+                          hTime.month == dayDate.month &&
+                          hTime.day == dayDate.day;
+              }
+
+              if (matches) {
+                dayHourly.add({
+                  'time': h['time'],
+                  'display_time': h['display_time'],
+                  'temp_c': h['temp_c'],
+                  'temp_f': h['temp_f'],
+                  'condition': h['condition'],
+                  'chance_of_rain': h['chance_of_rain'] ?? 0,
+                  'chance_of_snow': 0,
+                  'source': h['source'] ?? 'nea',
+                });
+              }
+            }
+
+            forecastDays.add({
+              'date': dateStr,
+              'day': {
+                'maxtemp_c': d['max_c'],
+                'maxtemp_f': d['max_f'],
+                'mintemp_c': d['min_c'],
+                'mintemp_f': d['min_f'],
+                'condition': d['condition'] ?? {},
+                'daily_chance_of_rain': d['chance_of_rain'] ?? 0,
+                'wind': d['wind'] ?? {},
+                'humidity': d['humidity'] ?? {},
+              },
+              'hour': dayHourly,
+              'source': d['source'] ?? 'nea',
+            });
+          }
+
+          return {
+            'source': 'nea',
+            'location': sgData['location'],
+            'current': sgData['current'],
+            'forecast': {'forecastday': forecastDays},
+          };
+        }
+      } catch (_) {}
+
       final weatherData = await _fetchWeatherData(coords['lat'], coords['lon']);
       final airQuality = await _fetchAirQualityData(
         coords['lat'],
@@ -273,59 +364,88 @@ class WeatherService {
       final hourlyWeatherCodes = hourly['weather_code'] as List;
       final hourlyPrecipProb = hourly['precipitation_probability'] as List;
 
-      for (int i = 0; i < dates.length && i < 14; i++) {
-        final maxTemp = (maxTemps[i] as num).toDouble();
-        final minTemp = (minTemps[i] as num).toDouble();
-        final weatherCode = (weatherCodes[i] as num).toInt();
-        final precip = (precipProb[i] as num).toInt();
+        for (int i = 0; i < dates.length && i < 14; i++) {
+          final maxTemp = (maxTemps[i] as num).toDouble();
+          final minTemp = (minTemps[i] as num).toDouble();
+          final weatherCode = (weatherCodes[i] as num).toInt();
+          final precip = (precipProb[i] as num).toInt();
 
-        // Get hourly data for this day
-        final dayDate = dates[i].toString();
-        final List<dynamic> hourlyDataForDay = [];
+          // Get hourly data for this day
+          final dayDate = dates[i].toString();
+          final List<dynamic> hourlyDataForDay = [];
+          
+          double? dayWindLow;
+          double? dayWindHigh;
+          int? dayRhLow;
+          int? dayRhHigh;
 
-        for (int h = 0; h < hourlyTimes.length; h++) {
-          final hourTimeStr = hourlyTimes[h].toString();
-          if (hourTimeStr.startsWith(dayDate)) {
-            hourlyDataForDay.add({
-              'time': hourTimeStr,
-              'temp_c': (hourlyTemps[h] as num).toDouble(),
-              'temp_f': ((hourlyTemps[h] as num).toDouble() * 9 / 5) + 32,
-              'feelslike_c': (hourlyFeelsLike[h] as num).toDouble(),
-              'feelslike_f':
-                  ((hourlyFeelsLike[h] as num).toDouble() * 9 / 5) + 32,
-              'chance_of_rain': (hourlyPrecipProb[h] as num?)?.toInt() ?? 0,
-              'chance_of_snow': 0,
+          // Extract hourly values for wind and humidity to find ranges
+          final hourlyWind = hourly['wind_speed_10m'] as List?;
+          final hourlyRh = hourly['relative_humidity_2m'] as List?;
+
+          for (int h = 0; h < hourlyTimes.length; h++) {
+            final hourTimeStr = hourlyTimes[h].toString();
+            if (hourTimeStr.startsWith(dayDate)) {
+              final tC = (hourlyTemps[h] as num).toDouble();
+              hourlyDataForDay.add({
+                'time': hourTimeStr,
+                'temp_c': tC,
+                'temp_f': (tC * 9 / 5) + 32,
+                'feelslike_c': (hourlyFeelsLike[h] as num).toDouble(),
+                'feelslike_f':
+                    ((hourlyFeelsLike[h] as num).toDouble() * 9 / 5) + 32,
+                'chance_of_rain': (hourlyPrecipProb[h] as num?)?.toInt() ?? 0,
+                'chance_of_snow': 0,
+                'condition': {
+                  'text': _getWeatherDescription(
+                    (hourlyWeatherCodes[h] as num).toInt(),
+                  ),
+                  'icon': '//cdn.weatherapi.com/weather/64x64/day/116.png',
+                },
+              });
+
+              if (hourlyWind != null && h < hourlyWind.length) {
+                final w = (hourlyWind[h] as num).toDouble();
+                if (dayWindLow == null || w < dayWindLow) dayWindLow = w;
+                if (dayWindHigh == null || w > dayWindHigh) dayWindHigh = w;
+              }
+              if (hourlyRh != null && h < hourlyRh.length) {
+                final r = (hourlyRh[h] as num).toInt();
+                if (dayRhLow == null || r < dayRhLow) dayRhLow = r;
+                if (dayRhHigh == null || r > dayRhHigh) dayRhHigh = r;
+              }
+            }
+          }
+
+          forecastDays.add({
+            'date': dayDate,
+            'day': {
+              'maxtemp_c': maxTemp,
+              'maxtemp_f': (maxTemp * 9 / 5) + 32,
+              'mintemp_c': minTemp,
+              'mintemp_f': (minTemp * 9 / 5) + 32,
               'condition': {
-                'text': _getWeatherDescription(
-                  (hourlyWeatherCodes[h] as num).toInt(),
-                ),
+                'text': _getWeatherDescription(weatherCode),
                 'icon': '//cdn.weatherapi.com/weather/64x64/day/116.png',
               },
-            });
-          }
-        }
-
-        forecastDays.add({
-          'date': dayDate,
-          'day': {
-            'maxtemp_c': maxTemp,
-            'maxtemp_f': (maxTemp * 9 / 5) + 32,
-            'mintemp_c': minTemp,
-            'mintemp_f': (minTemp * 9 / 5) + 32,
-            'condition': {
-              'text': _getWeatherDescription(weatherCode),
-              'icon': '//cdn.weatherapi.com/weather/64x64/day/116.png',
+              'daily_chance_of_rain': precip,
+              'wind': {
+                'low_kph': dayWindLow ?? 0.0,
+                'high_kph': dayWindHigh ?? 0.0,
+              },
+              'humidity': {
+                'low': dayRhLow ?? 0,
+                'high': dayRhHigh ?? 0,
+              },
             },
-            'daily_chance_of_rain': precip,
-          },
-          'astro': {
-            'moon_phase': 'New Moon',
-            'sunrise': '06:00 AM',
-            'sunset': '06:00 PM',
-          },
-          'hour': hourlyDataForDay,
-        });
-      }
+            'astro': {
+              'moon_phase': 'New Moon',
+              'sunrise': '06:00 AM',
+              'sunset': '06:00 PM',
+            },
+            'hour': hourlyDataForDay,
+          });
+        }
 
       return {
         'location': {
@@ -538,7 +658,7 @@ class WeatherService {
     final url = Uri.parse(
       '$_weatherUrl?latitude=$lat&longitude=$lon'
       '&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m,wind_direction_10m,pressure_msl,visibility'
-      '&hourly=temperature_2m,apparent_temperature,weather_code,visibility,precipitation_probability'
+      '&hourly=temperature_2m,apparent_temperature,weather_code,visibility,precipitation_probability,wind_speed_10m,relative_humidity_2m'
       '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
       '&timezone=auto'
       '&forecast_days=14',

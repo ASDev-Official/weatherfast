@@ -12,6 +12,7 @@ class WeatherInsightsService {
     required double uvIndex,
     required int aqi,
     required List<Map<String, dynamic>> dailyForecasts,
+    required String country,
   }) {
     final trends = _analyzeTrends(dailyForecasts);
     final risks = _assessRisks(
@@ -36,7 +37,7 @@ class WeatherInsightsService {
           _generateClothingAdvice(currentTemp, highTemp, lowTemp, condition),
       'hourlyInsights': _generateHourlyInsights(dailyForecasts),
       'weekAhead': _generateWeekAheadInsights(dailyForecasts),
-      'bestTimes': _findBestTimes(dailyForecasts),
+      'bestTimes': _findBestTimes(dailyForecasts, country),
     };
   }
 
@@ -433,7 +434,14 @@ class WeatherInsightsService {
   }
 
   Map<String, String> _findBestTimes(
-      List<Map<String, dynamic>> dailyForecasts) {
+      List<Map<String, dynamic>> dailyForecasts, String country) {
+    if (country.toLowerCase().contains('singapore')) {
+      return {
+        'title': 'Best Time: 7-9 AM & 5-8 PM',
+        'description': 'Optimal conditions for outdoor activities in Singapore',
+      };
+    }
+
     if (dailyForecasts.isEmpty) {
       return {
         'title': 'No data',

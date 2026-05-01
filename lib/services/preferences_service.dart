@@ -1,22 +1,22 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferencesService {
-  static const _keyUseFahrenheit = 'use_fahrenheit';
-  static const _keyLastLocationQuery = 'last_location_query';
+  static const String _kUseFahrenheit = 'use_fahrenheit';
+  static const String _kLastLocationQuery = 'last_location_query';
 
   static Future<bool> loadUseFahrenheit() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_keyUseFahrenheit) ?? false;
+    return prefs.getBool(_kUseFahrenheit) ?? false;
   }
 
   static Future<void> saveUseFahrenheit(bool value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_keyUseFahrenheit, value);
+    await prefs.setBool(_kUseFahrenheit, value);
   }
 
   static Future<String?> loadLastLocationQuery() async {
     final prefs = await SharedPreferences.getInstance();
-    final value = prefs.getString(_keyLastLocationQuery);
+    final value = prefs.getString(_kLastLocationQuery);
     if (value == null || value.isEmpty) {
       return null;
     }
@@ -29,6 +29,6 @@ class PreferencesService {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyLastLocationQuery, trimmed);
+    await prefs.setString(_kLastLocationQuery, trimmed);
   }
 }

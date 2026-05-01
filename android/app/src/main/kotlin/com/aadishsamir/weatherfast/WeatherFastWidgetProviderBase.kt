@@ -20,6 +20,7 @@ abstract class WeatherFastWidgetProviderBase(
         val tempSize: Float,
         val hourlyTimeSize: Float,
         val hourlyTempSize: Float,
+        val hourlyConditionSize: Float,
         val dailyNameSize: Float,
         val dailyTempSize: Float,
     )
@@ -134,6 +135,7 @@ abstract class WeatherFastWidgetProviderBase(
         val tempSize = profile.tempSize
         val hourlyTimeSize = profile.hourlyTimeSize
         val hourlyTempSize = profile.hourlyTempSize
+        val hourlyConditionSize = profile.hourlyConditionSize
         val dailyNameSize = profile.dailyNameSize
         val dailyTempSize = profile.dailyTempSize
 
@@ -161,6 +163,15 @@ abstract class WeatherFastWidgetProviderBase(
             )
             if (tempId != 0) {
                 views.setTextViewTextSize(tempId, android.util.TypedValue.COMPLEX_UNIT_SP, hourlyTempSize)
+            }
+
+            val conditionId = context.resources.getIdentifier(
+                "widget_hour_condition_$index",
+                "id",
+                context.packageName,
+            )
+            if (conditionId != 0) {
+                views.setTextViewTextSize(conditionId, android.util.TypedValue.COMPLEX_UNIT_SP, hourlyConditionSize)
             }
         }
 
@@ -220,6 +231,7 @@ abstract class WeatherFastWidgetProviderBase(
                 tempSize = 28f,
                 hourlyTimeSize = 9f,
                 hourlyTempSize = 11f,
+                hourlyConditionSize = 8f,
                 dailyNameSize = 11f,
                 dailyTempSize = 11f,
             )
@@ -231,6 +243,7 @@ abstract class WeatherFastWidgetProviderBase(
                 tempSize = 32f,
                 hourlyTimeSize = 10f,
                 hourlyTempSize = 12f,
+                hourlyConditionSize = 9f,
                 dailyNameSize = 12f,
                 dailyTempSize = 12f,
             )
@@ -242,6 +255,7 @@ abstract class WeatherFastWidgetProviderBase(
                 tempSize = 36f,
                 hourlyTimeSize = 11f,
                 hourlyTempSize = 13f,
+                hourlyConditionSize = 10f,
                 dailyNameSize = 13f,
                 dailyTempSize = 13f,
             )
@@ -253,6 +267,7 @@ abstract class WeatherFastWidgetProviderBase(
                 tempSize = 40f,
                 hourlyTimeSize = 12f,
                 hourlyTempSize = 14f,
+                hourlyConditionSize = 11f,
                 dailyNameSize = 14f,
                 dailyTempSize = 14f,
             )
@@ -310,7 +325,21 @@ abstract class WeatherFastWidgetProviderBase(
         for (index in 1..24) {
             val hourText = widgetData.getString("wf_hour_$index", "--") ?: "--"
             val hourTemp = widgetData.getString("wf_hour_temp_$index", "--") ?: "--"
+            val hourCondition = widgetData.getString("wf_hour_condition_$index", "--") ?: "--"
             val hourGlyph = widgetData.getString("wf_hour_icon_$index", glyph) ?: glyph
+
+            val cardId = context.resources.getIdentifier(
+                "widget_hour_card_$index",
+                "id",
+                context.packageName,
+            )
+            
+            if (hourText == "--" && hourTemp == "--") {
+                if (cardId != 0) {
+                    views.setViewVisibility(cardId, View.GONE)
+                }
+                continue
+            }
 
             val timeId = context.resources.getIdentifier(
                 "widget_hour_time_$index",
@@ -328,6 +357,15 @@ abstract class WeatherFastWidgetProviderBase(
             )
             if (tempId != 0) {
                 views.setTextViewText(tempId, hourTemp)
+            }
+
+            val conditionId = context.resources.getIdentifier(
+                "widget_hour_condition_$index",
+                "id",
+                context.packageName,
+            )
+            if (conditionId != 0) {
+                views.setTextViewText(conditionId, hourCondition)
             }
 
             val iconId = context.resources.getIdentifier(

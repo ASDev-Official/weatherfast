@@ -113,6 +113,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_1"
                     android:layout_width="18dp"
@@ -123,13 +132,16 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_1"
+                    android:id="@+id/widget_hour_condition_1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
 
             </LinearLayout>
 
@@ -152,6 +164,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_2"
                     android:layout_width="18dp"
@@ -162,13 +183,16 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_2"
+                    android:id="@+id/widget_hour_condition_2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
 
             </LinearLayout>
 
@@ -191,6 +215,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_3"
                     android:layout_width="18dp"
@@ -201,13 +234,16 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_3"
+                    android:id="@+id/widget_hour_condition_3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
 
             </LinearLayout>
 
@@ -230,6 +266,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_4"
                     android:layout_width="18dp"
@@ -240,13 +285,16 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_4"
+                    android:id="@+id/widget_hour_condition_4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
 
             </LinearLayout>
 
@@ -269,6 +317,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_5"
                     android:layout_width="18dp"
@@ -279,13 +336,16 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_5"
+                    android:id="@+id/widget_hour_condition_5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
 
             </LinearLayout>
 
@@ -308,6 +368,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_6"
                     android:layout_width="18dp"
@@ -318,13 +387,16 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_6"
+                    android:id="@+id/widget_hour_condition_6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
 
             </LinearLayout>
         </LinearLayout>
@@ -358,6 +430,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_7"
                     android:layout_width="18dp"
@@ -368,13 +449,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_7"
+                    android:id="@+id/widget_hour_condition_7"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -396,6 +481,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_8"
                     android:layout_width="18dp"
@@ -406,13 +500,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_8"
+                    android:id="@+id/widget_hour_condition_8"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -434,6 +532,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_9"
                     android:layout_width="18dp"
@@ -444,13 +551,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_9"
+                    android:id="@+id/widget_hour_condition_9"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -472,6 +583,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_10"
                     android:layout_width="18dp"
@@ -482,13 +602,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_10"
+                    android:id="@+id/widget_hour_condition_10"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -510,6 +634,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_11"
                     android:layout_width="18dp"
@@ -520,13 +653,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_11"
+                    android:id="@+id/widget_hour_condition_11"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -548,6 +685,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_12"
                     android:layout_width="18dp"
@@ -558,13 +704,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_12"
+                    android:id="@+id/widget_hour_condition_12"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
         </LinearLayout>
 
@@ -597,6 +747,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_13"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_13"
                     android:layout_width="18dp"
@@ -607,13 +766,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_13"
+                    android:id="@+id/widget_hour_condition_13"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -635,6 +798,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_14"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_14"
                     android:layout_width="18dp"
@@ -645,13 +817,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_14"
+                    android:id="@+id/widget_hour_condition_14"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -673,6 +849,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_15"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_15"
                     android:layout_width="18dp"
@@ -683,13 +868,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_15"
+                    android:id="@+id/widget_hour_condition_15"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -711,6 +900,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_16"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_16"
                     android:layout_width="18dp"
@@ -721,13 +919,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_16"
+                    android:id="@+id/widget_hour_condition_16"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -749,6 +951,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_17"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_17"
                     android:layout_width="18dp"
@@ -759,13 +970,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_17"
+                    android:id="@+id/widget_hour_condition_17"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -787,6 +1002,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_18"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_18"
                     android:layout_width="18dp"
@@ -797,13 +1021,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_18"
+                    android:id="@+id/widget_hour_condition_18"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
         </LinearLayout>
 
@@ -836,6 +1064,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_19"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_19"
                     android:layout_width="18dp"
@@ -846,13 +1083,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_19"
+                    android:id="@+id/widget_hour_condition_19"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -874,6 +1115,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_20"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_20"
                     android:layout_width="18dp"
@@ -884,13 +1134,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_20"
+                    android:id="@+id/widget_hour_condition_20"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -912,6 +1166,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_21"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_21"
                     android:layout_width="18dp"
@@ -922,13 +1185,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_21"
+                    android:id="@+id/widget_hour_condition_21"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -950,6 +1217,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_22"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_22"
                     android:layout_width="18dp"
@@ -960,13 +1236,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_22"
+                    android:id="@+id/widget_hour_condition_22"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -988,6 +1268,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_23"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_23"
                     android:layout_width="18dp"
@@ -998,13 +1287,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_23"
+                    android:id="@+id/widget_hour_condition_23"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
 
             <LinearLayout
@@ -1026,6 +1319,15 @@
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
+                <TextView
+                    android:id="@+id/widget_hour_time_24"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="--"
+                    android:textColor="#CADAEA"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
                 <ImageView
                     android:id="@+id/widget_hour_icon_24"
                     android:layout_width="18dp"
@@ -1036,13 +1338,17 @@
                     android:tint="#F3CD3D" />
 
                 <TextView
-                    android:id="@+id/widget_hour_time_24"
+                    android:id="@+id/widget_hour_condition_24"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="--"
                     android:textColor="#CADAEA"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
+                    android:textSize="9sp"
+                    android:gravity="center"
+                    android:textAlignment="center" />
+
+                
+
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

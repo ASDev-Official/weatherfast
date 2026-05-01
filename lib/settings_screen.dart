@@ -6,7 +6,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'services/global_data.dart';
 import 'services/preferences_service.dart';
 import 'services/widget_refresh_service.dart';
-import 'ui/open_meteo_attribution.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -168,7 +167,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  const OpenMeteoAttribution(padding: EdgeInsets.zero),
                   const SizedBox(height: 24),
 
                   if (kDebugMode) ...[

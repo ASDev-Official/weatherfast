@@ -4,7 +4,6 @@ import 'services/global_data.dart';
 import 'services/weather_insights_service.dart';
 import 'time_service.dart';
 import 'ui/animated_weather_backdrop.dart';
-import 'ui/open_meteo_attribution.dart';
 import 'weather_service.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -140,6 +139,7 @@ class _DetailScreenState extends State<DetailScreen>
       final current = forecastData['current'] ?? {};
       final dailyForecasts =
           (forecastData['forecast']?['forecastday'] as List?) ?? [];
+      final country = forecastData['location']?['country']?.toString() ?? '';
 
       final insights = _insightsService.generateInsights(
         condition: _condition,
@@ -151,6 +151,7 @@ class _DetailScreenState extends State<DetailScreen>
         uvIndex: (current['uv'] as num?)?.toDouble() ?? 0.0,
         aqi: _aqi ?? 0,
         dailyForecasts: dailyForecasts.cast<Map<String, dynamic>>(),
+        country: country,
       );
 
       if (mounted) {
@@ -786,7 +787,6 @@ class _DetailScreenState extends State<DetailScreen>
               SizedBox(height: 16),
               Text('Loading weather insights...'),
               Spacer(),
-              OpenMeteoAttribution(padding: EdgeInsets.fromLTRB(16, 0, 16, 16)),
             ],
           ),
         ),
@@ -846,9 +846,6 @@ class _DetailScreenState extends State<DetailScreen>
                           SliverToBoxAdapter(child: _buildHourlyInsightsCard()),
                           SliverToBoxAdapter(child: _buildHealthTipsCard()),
                           SliverToBoxAdapter(child: _buildWeekAheadCard()),
-                          const SliverToBoxAdapter(
-                            child: OpenMeteoAttribution(),
-                          ),
 
                           const SliverToBoxAdapter(child: SizedBox(height: 24)),
                         ],

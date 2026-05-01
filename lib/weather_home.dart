@@ -9,6 +9,7 @@ import 'services/weather_cache_service.dart';
 import 'services/widget_refresh_service.dart';
 import 'ui/animated_weather_backdrop.dart';
 import 'ui/open_meteo_attribution.dart';
+import 'ui/daily_range_tile.dart';
 import 'time_utils.dart';
 import 'weather_service.dart';
 
@@ -35,7 +36,6 @@ class _WeatherHomeState extends State<WeatherHome> {
   // ignore: unused_field
   bool _isRefreshing = false;
   final Set<String> _expandedDays = {};
-  bool _hasInitializedExpandedDays = false;
 
   void _showUpdatingOverlay() {
     if (_updatingOverlay != null) return;
@@ -75,7 +75,18 @@ class _WeatherHomeState extends State<WeatherHome> {
   @override
   void initState() {
     super.initState();
+    _initializeExpandedDays();
     _hydrateAndRefresh();
+  }
+
+  void _initializeExpandedDays() {
+    final now = DateTime.now();
+    final today =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final tomorrow = now.add(const Duration(days: 1));
+    final tomorrowKey =
+        '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
+    _expandedDays.addAll([today, tomorrowKey]);
   }
 
   @override
@@ -423,10 +434,16 @@ class _WeatherHomeState extends State<WeatherHome> {
                     sliver: SliverToBoxAdapter(child: _buildMetricsGrid()),
                   ),
                   SliverToBoxAdapter(child: _buildHourlyStrip()),
-                  SliverToBoxAdapter(child: _buildDailyForecast()),
-                  SliverToBoxAdapter(child: _buildInsights()),
+                  if (_weatherData != null &&
+                      _weatherData!['sg_regions'] != null)
+                    SliverToBoxAdapter(child: _buildSgRegionalForecast()),
+                  SliverToBoxAdapter(child: _buildDailyForecast()),                  SliverToBoxAdapter(child: _buildInsights()),
                   if (_weatherData != null)
-                    const SliverToBoxAdapter(child: OpenMeteoAttribution()),
+                    SliverToBoxAdapter(
+                      child: OpenMeteoAttribution(
+                        source: _weatherData!['source'] ?? 'open-meteo',
+                      ),
+                    ),
                   const SliverToBoxAdapter(child: SizedBox(height: 24)),
                 ],
               ),
@@ -629,15 +646,31 @@ class _WeatherHomeState extends State<WeatherHome> {
     if (forecastDays.isEmpty) return const SizedBox.shrink();
 
     final locationTime = _resolveLocalTime(_weatherData);
-    final now = DateTime.now();
 
     // Group hourly data by day
     final Map<String, List<Map<String, dynamic>>> hoursByDay = {};
+
     for (var day in forecastDays) {
       final hours = day['hour'] as List? ?? [];
       for (var hour in hours) {
-        final hourTime = DateTime.parse(hour['time']);
-        if (hourTime.isAfter(locationTime)) {
+        final rawTime = hour['time']?.toString() ?? '';
+        final displayTime = hour['display_time']?.toString() ?? '';
+        if (rawTime.isEmpty) continue;
+        
+        final hourTime = DateTime.tryParse(rawTime);
+        if (hourTime == null) continue;
+
+        bool shouldInclude = false;
+        if (displayTime.isNotEmpty) {
+          // For NEA period data, include it if it's the current period or a future one
+          // We can check if the current time is before the start of the period, 
+          // or if it's a multi-day forecast where the date is today or later.
+          shouldInclude = true; // For Singapore NEA, we generally want all provided periods
+        } else if (hourTime.isAfter(locationTime)) {
+          shouldInclude = true;
+        }
+
+        if (shouldInclude) {
           final dateKey =
               '${hourTime.year}-${hourTime.month.toString().padLeft(2, '0')}-${hourTime.day.toString().padLeft(2, '0')}';
           hoursByDay.putIfAbsent(dateKey, () => []);
@@ -648,64 +681,95 @@ class _WeatherHomeState extends State<WeatherHome> {
 
     if (hoursByDay.isEmpty) return const SizedBox.shrink();
 
-    // Initialize expanded days (today and tomorrow by default) - only once
-    if (!_hasInitializedExpandedDays) {
-      final today =
-          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
-      final tomorrow = now.add(const Duration(days: 1));
-      final tomorrowKey =
-          '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
-      _expandedDays.addAll([today, tomorrowKey]);
-      _hasInitializedExpandedDays = true;
-    }
-
     // Build horizontal list items
     final List<Widget> horizontalItems = [];
+    final isSingapore = _weatherData?['location']?['country'] == 'Singapore';
+    String? lastSource;
+
     for (var entry in hoursByDay.entries) {
       final dateKey = entry.key;
       final hours = entry.value;
-      final firstHour = hours.first['time'] as DateTime;
+      if (hours.isEmpty) continue;
+      
+      final firstHourTime = hours.first['time'] as DateTime;
       final isExpanded = _expandedDays.contains(dateKey);
+      final hasOm = hours.any((h) => h['data']['source'] == 'open-meteo');
+      
+      // For Singapore, we only show headers for days that have Open-Meteo data
+      final showHeader = !isSingapore || hasOm;
 
       // Add date header with toggle
-      horizontalItems.add(
-        _CollapsibleDateHeader(
-          date: firstHour,
-          isExpanded: isExpanded,
-          onTap: () {
-            setState(() {
-              if (isExpanded) {
-                _expandedDays.remove(dateKey);
-              } else {
-                _expandedDays.add(dateKey);
-              }
-            });
-          },
-        ),
-      );
+      if (showHeader) {
+        horizontalItems.add(
+          _CollapsibleDateHeader(
+            date: firstHourTime,
+            isExpanded: isExpanded,
+            onTap: () {
+              setState(() {
+                if (isExpanded) {
+                  _expandedDays.remove(dateKey);
+                } else {
+                  _expandedDays.add(dateKey);
+                }
+              });
+            },
+          ),
+        );
+      }
 
-      // Add hourly items if expanded
-      if (isExpanded) {
+      // Add hourly items (Always show NEA-only days for Singapore, check expansion for others)
+      if (!showHeader || isExpanded) {
         for (var hourEntry in hours) {
-          final hourTime = hourEntry['time'] as DateTime;
           final hourData = hourEntry['data'];
-          final temp = GlobalData.useFahrenheit
-              ? hourData['temp_f']
-              : hourData['temp_c'];
-          final condition = hourData['condition']['text'] as String;
+          final source = hourData['source'] ?? 'nea';
+
+          // Source transition indicator
+          if (lastSource != null && lastSource != source) {
+            horizontalItems.add(
+              _SourceTransitionChip(
+                label: source == 'open-meteo' ? 'Data from Open-Meteo' : 'Data from NEA',
+              ),
+            );
+          }
+          lastSource = source;
+
+          final hourTime = hourEntry['time'] as DateTime;
+          final condition = hourData['condition']?['text']?.toString() ?? 'Clear';
           final precip =
               hourData['chance_of_rain'] ?? hourData['chance_of_snow'] ?? 0;
+          
+          final String? displayTime = hourData['display_time'];
 
-          horizontalItems.add(
-            _ForecastChip(
-              label: DateFormat('h a').format(hourTime),
-              value: '${temp.round()}°',
-
-              icon: _iconForCondition(condition),
-              caption: '$precip% precip',
-            ),
-          );
+          if (displayTime != null && displayTime.isNotEmpty) {
+            // NEA Period data
+            horizontalItems.add(
+              _SgPeriodCard(
+                label: displayTime,
+                icon: _iconForCondition(condition),
+                condition: condition,
+                precip: '$precip% precip',
+              ),
+            );
+          } else {
+            // Standard hourly data
+            final temp = GlobalData.useFahrenheit
+                ? (hourData['temp_f'] ?? 0.0)
+                : (hourData['temp_c'] ?? 0.0);
+            horizontalItems.add(
+              _ForecastChip(
+                label: DateFormat('h a').format(hourTime),
+                value: '${(temp as num).round()}°',
+                icon: _iconForCondition(condition),
+                condition: condition,
+                caption: '$precip% precip',
+              ),
+            );
+          }
         }
+      } else {
+        // If day is collapsed, update lastSource to the last element's source 
+        // to detect transitions in subsequent days
+        lastSource = hours.last['data']['source'] ?? 'nea';
       }
     }
 
@@ -732,17 +796,121 @@ class _WeatherHomeState extends State<WeatherHome> {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: 160,
+            height: 180,
             child: Stack(
               children: [
                 ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   scrollDirection: Axis.horizontal,
                   itemCount: horizontalItems.length,
-                  separatorBuilder: (_, _) => const SizedBox(width: 12),
+                  separatorBuilder: (context, index) => const SizedBox(width: 12),
                   itemBuilder: (context, index) => horizontalItems[index],
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSgRegionalForecast() {
+    final allRanges = _weatherData!['sg_period_ranges'] as List? ?? [];
+    
+    // Find the range that is currently valid
+    final now = DateTime.now().toUtc().add(const Duration(hours: 8));
+    final currentRanges = allRanges.where((r) {
+      final start = DateTime.tryParse(r['start'] ?? '');
+      final end = DateTime.tryParse(r['end'] ?? '');
+      if (start == null || end == null) return false;
+      return now.isAfter(start.subtract(const Duration(seconds: 1))) && now.isBefore(end);
+    }).toList();
+
+    if (currentRanges.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 24, left: 16, right: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.map_outlined,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Regional Outlook',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 160,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: currentRanges.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final r = currentRanges[index];
+                final regionName = r['region'].toString().toUpperCase();
+                final text = r['text'] ?? '';
+                final period = r['period_text'] ?? '';
+
+                return Card(
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Container(
+                    width: 160,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          regionName,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          period,
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const Spacer(),
+                        Row(
+                          children: [
+                            Icon(
+                              _iconForCondition(text),
+                              size: 20,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                text,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -769,37 +937,108 @@ class _WeatherHomeState extends State<WeatherHome> {
               ),
               const SizedBox(width: 8),
               Text(
-                'Next 6 days',
+                'Next ${list.length} days',
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ],
           ),
           const SizedBox(height: 12),
-          ...list.map((day) {
-            final date = DateTime.parse(day['date']);
-            final hi = GlobalData.useFahrenheit
-                ? day['day']['maxtemp_f']
-                : day['day']['maxtemp_c'];
-            final lo = GlobalData.useFahrenheit
-                ? day['day']['mintemp_f']
-                : day['day']['mintemp_c'];
-            final condition = day['day']['condition']['text'] as String;
-            final rain = day['day']['daily_chance_of_rain'];
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: _DailyTile(
-                label: DateFormat('EEE, MMM d').format(date),
-                hi: hi,
-                lo: lo,
-                icon: _iconForCondition(condition),
-                subtitle: '$rain% precip',
-              ),
-            );
-          }),
+          ..._buildDailyList(list),
         ],
       ),
     );
+  }
+
+  List<Widget> _buildDailyList(List<dynamic> days) {
+    final List<Widget> items = [];
+    String? lastSource;
+
+    for (final day in days) {
+      final dayMap = day['day'] as Map?;
+      final source = day['source'] ?? 'nea';
+
+      if (lastSource != null && lastSource != source) {
+        items.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              children: [
+                const Expanded(child: Divider()),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Data from Open-Meteo',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 14,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                ),
+                const Expanded(child: Divider()),
+              ],
+            ),
+          ),
+        );
+      }
+      lastSource = source;
+
+      final date = DateTime.parse(day['date']);
+      final hi = GlobalData.useFahrenheit
+          ? day['day']['maxtemp_f']
+          : day['day']['maxtemp_c'];
+      final lo = GlobalData.useFahrenheit
+          ? day['day']['mintemp_f']
+          : day['day']['mintemp_c'];
+      final condition = day['day']['condition']['text'] as String;
+      final rain = day['day']['daily_chance_of_rain'];
+
+      if (dayMap != null &&
+          (dayMap.containsKey('wind') ||
+              dayMap.containsKey('humidity'))) {
+        final wind = dayMap['wind'] ?? {};
+        final hum = dayMap['humidity'] ?? {};
+        items.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: DailyRangeTile(
+              label: DateFormat('EEE, MMM d').format(date),
+              max: hi,
+              min: lo,
+              windLow: (wind['low_kph'] as num?)?.toDouble() ?? 0.0,
+              windHigh: (wind['high_kph'] as num?)?.toDouble() ?? 0.0,
+              rhLow: (hum['low'] as num?)?.toInt() ?? 0,
+              rhHigh: (hum['high'] as num?)?.toInt() ?? 0,
+              icon: _iconForCondition(condition),
+              subtitle: '$rain% precip',
+              useFahrenheit: GlobalData.useFahrenheit,
+            ),
+          ),
+        );
+      } else {
+        items.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: _DailyTile(
+              label: DateFormat('EEE, MMM d').format(date),
+              hi: hi,
+              lo: lo,
+              icon: _iconForCondition(condition),
+              subtitle: '$rain% precip',
+            ),
+          ),
+        );
+      }
+    }
+    return items;
   }
 
   Widget _buildInsights() {
@@ -1056,12 +1295,14 @@ class _ForecastChip extends StatelessWidget {
     required this.label,
     required this.value,
     required this.icon,
+    required this.condition,
     required this.caption,
   });
 
   final String label;
   final String value;
   final IconData icon;
+  final String condition;
   final String caption;
 
   @override
@@ -1069,36 +1310,170 @@ class _ForecastChip extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Card(
       elevation: 1,
-      child: SizedBox(
-        width: 120,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: Theme.of(context).textTheme.bodyMedium),
-              const Spacer(),
-              Row(
-                children: [
-                  Icon(icon, color: scheme.primary),
-                  const SizedBox(width: 6),
-                  Text(
-                    value,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+      child: Container(
+        width: 140,
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
-              const SizedBox(height: 6),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const Spacer(),
+            Row(
+              children: [
+                Icon(icon, color: scheme.primary, size: 20),
+                const SizedBox(width: 6),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Text(
+              condition,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+            Text(
+              caption,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontSize: 10,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SgPeriodCard extends StatelessWidget {
+  const _SgPeriodCard({
+    required this.label,
+    required this.icon,
+    required this.condition,
+    required this.precip,
+  });
+
+  final String label;
+  final IconData icon;
+  final String condition;
+  final String precip;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    
+    // Parse "From X to Y"
+    String from = label;
+    String to = '';
+    if (label.contains(' to ')) {
+      final parts = label.split(' to ');
+      from = parts[0].trim();
+      to = parts[1].trim();
+    }
+
+    return Card(
+      elevation: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      child: Container(
+        width: 150,
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              from,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: scheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            if (to.isNotEmpty)
               Text(
-                caption,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                'to $to',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
               ),
-            ],
-          ),
+            const Spacer(),
+            Row(
+              children: [
+                Icon(icon, color: scheme.secondary, size: 24),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        condition,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                        // Allow wrapping for long descriptors
+                      ),
+                      Text(
+                        precip,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                              fontSize: 10,
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SourceTransitionChip extends StatelessWidget {
+  const _SourceTransitionChip({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.only(right: 12),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: scheme.outlineVariant),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(width: 8),
+            Icon(Icons.arrow_forward_rounded, size: 14, color: scheme.onSurfaceVariant),
+          ],
         ),
       ),
     );

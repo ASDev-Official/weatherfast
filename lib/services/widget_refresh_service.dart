@@ -96,10 +96,16 @@ class WidgetRefreshService {
     final locationName = (weatherData['location']?['name'] ?? '').toString();
     final condition =
         (weatherData['current']?['condition']?['text'] ?? 'Unknown').toString();
+    final source = (weatherData['source'] ?? 'open-meteo').toString();
 
     final num? tempValue = useFahrenheit
         ? (weatherData['current']?['temp_f'] as num?)
         : (weatherData['current']?['temp_c'] as num?);
+    // ... rest of data extraction ...
+    
+    // We can save source if we want widgets to show it, but for now we just 
+    // ensure the data fetched is correct.
+    await HomeWidget.saveWidgetData<String>('wf_source', source);
     final num? feelsLikeValue = useFahrenheit
         ? (weatherData['current']?['feelslike_f'] as num?)
         : (weatherData['current']?['feelslike_c'] as num?);
@@ -125,30 +131,88 @@ class WidgetRefreshService {
     final hourlyLabels = <String>[];
     final hourlyIcons = <String>[];
     final hourlyTemps = <String>[];
+    final hourlyConditions = <String>[];
+    String? hourlySourceTransition;
+    String? lastHourlySource;
+
     for (final item in nextHoursRaw) {
       if (item is! Map) {
         continue;
       }
 
+      final displayTime = item['display_time']?.toString() ?? '';
       final timeRaw = item['time']?.toString() ?? '';
       final parsedTime = DateTime.tryParse(timeRaw);
-      if (parsedTime == null) {
+      final source = item['source']?.toString() ?? 'nea';
+      final conditionText = item['condition']?['text']?.toString() ?? '';
+
+      if (lastHourlySource != null && lastHourlySource != source && hourlySourceTransition == null) {
+        hourlySourceTransition = source == 'open-meteo' ? 'Data from Open-Meteo' : 'Data from NEA';
+      }
+      lastHourlySource = source;
+
+      if (displayTime.isNotEmpty) {
+        // Handle NEA Ranged Periods for Singapore - using 2 forecast spaces
+        String from = displayTime;
+        String to = '';
+        if (displayTime.contains(' to ')) {
+          final parts = displayTime.split(' to ');
+          from = parts[0].trim();
+          to = parts[1].trim();
+        }
+
+        String parseTimeShort(String t) {
+          if (t.toLowerCase().contains('midday')) return '12 PM';
+          if (t.toLowerCase().contains('midnight')) return '12 AM';
+          final match = RegExp(r'(\d{1,2})\s*([aApP][mM])').firstMatch(t);
+          if (match != null) {
+            return '${match.group(1)} ${match.group(2)!.toUpperCase()}';
+          }
+          // Fallback if parsing fails
+          return t.length > 8 ? t.substring(0, 8) : t;
+        }
+
+        final fromLabel = parseTimeShort(from);
+        final toLabel = to.isNotEmpty ? parseTimeShort(to) : '';
+
+        // Space 1: From
+        hourlyTemps.add('From');
+        hourlyLabels.add(fromLabel);
+        hourlyIcons.add(
+          item['glyph']?.toString() ??
+              _glyphForCondition(conditionText),
+        );
+        hourlyConditions.add(conditionText);
+
+        // Space 2: To
+        if (hourlyLabels.length < 24 && toLabel.isNotEmpty) {
+          hourlyTemps.add('To');
+          hourlyLabels.add(toLabel);
+          hourlyIcons.add(
+            item['glyph']?.toString() ??
+                _glyphForCondition(conditionText),
+          );
+          hourlyConditions.add(conditionText);
+        }
+      } else if (parsedTime != null) {
+        // Standard Hourly
+        final hourLabel = _formatHourLabel(parsedTime);
+        final num? hourTempValue = useFahrenheit
+            ? item['temp_f'] as num?
+            : item['temp_c'] as num?;
+        final hourTemp = hourTempValue == null
+            ? '--'
+            : '${hourTempValue.round()}°';
+        hourlyLabels.add(hourLabel);
+        hourlyTemps.add(hourTemp);
+        hourlyIcons.add(
+          item['glyph']?.toString() ??
+              _glyphForCondition(conditionText),
+        );
+        hourlyConditions.add(conditionText);
+      } else {
         continue;
       }
-
-      final hourLabel = _formatHourLabel(parsedTime);
-      final num? hourTempValue = useFahrenheit
-          ? item['temp_f'] as num?
-          : item['temp_c'] as num?;
-      final hourTemp = hourTempValue == null
-          ? '--'
-          : '${hourTempValue.round()}$unit';
-      hourlyLabels.add(hourLabel);
-      hourlyTemps.add(hourTemp);
-      hourlyIcons.add(
-        item['glyph']?.toString() ??
-            _glyphForCondition(item['condition']?['text']?.toString() ?? ''),
-      );
 
       if (hourlyLabels.length >= 24) {
         break;
@@ -158,6 +222,9 @@ class WidgetRefreshService {
     final dayNames = <String>[];
     final dayTemps = <String>[];
     final dayIcons = <String>[];
+    String? dailySourceTransition;
+    String? lastDailySource;
+
     for (final item in nextDaysRaw) {
       if (item is! Map) {
         continue;
@@ -166,6 +233,13 @@ class WidgetRefreshService {
       final dateRaw = item['date']?.toString() ?? '';
       final parsed = DateTime.tryParse(dateRaw);
       final dayName = parsed == null ? '--' : _weekdayLabel(parsed.weekday);
+      final source = item['source']?.toString() ?? 'nea';
+
+      if (lastDailySource != null && lastDailySource != source && dailySourceTransition == null) {
+        dailySourceTransition = source == 'open-meteo' ? 'Data from Open-Meteo' : 'Data from NEA';
+      }
+      lastDailySource = source;
+
       final num? maxValue = useFahrenheit
           ? item['max_f'] as num?
           : item['max_c'] as num?;
@@ -212,6 +286,7 @@ class WidgetRefreshService {
       windKph == null ? '--' : '${windKph.round()} km/h',
     );
     await HomeWidget.saveWidgetData<String>(_kAqi, aqi == null ? '--' : '$aqi');
+
     for (int index = 1; index <= 24; index++) {
       await HomeWidget.saveWidgetData<String>(
         'wf_hour_$index',
@@ -224,6 +299,10 @@ class WidgetRefreshService {
       await HomeWidget.saveWidgetData<String>(
         'wf_hour_temp_$index',
         hourlyTemps.length >= index ? hourlyTemps[index - 1] : '--',
+      );
+      await HomeWidget.saveWidgetData<String>(
+        'wf_hour_condition_$index',
+        hourlyConditions.length >= index ? hourlyConditions[index - 1] : '',
       );
     }
     await HomeWidget.saveWidgetData<String>(
@@ -341,6 +420,8 @@ class WidgetRefreshService {
       await HomeWidget.saveWidgetData<String>(_kHumidity, '--');
       await HomeWidget.saveWidgetData<String>(_kWind, '--');
       await HomeWidget.saveWidgetData<String>(_kAqi, '--');
+      await HomeWidget.saveWidgetData<String>('wf_hourly_source_transition', '');
+      await HomeWidget.saveWidgetData<String>('wf_daily_source_transition', '');
       for (int index = 1; index <= 24; index++) {
         await HomeWidget.saveWidgetData<String>('wf_hour_$index', '--');
         await HomeWidget.saveWidgetData<String>(
@@ -348,6 +429,7 @@ class WidgetRefreshService {
           'partly',
         );
         await HomeWidget.saveWidgetData<String>('wf_hour_temp_$index', '--');
+        await HomeWidget.saveWidgetData<String>('wf_hour_condition_$index', '');
       }
       await HomeWidget.saveWidgetData<String>(_kDayName1, '--');
       await HomeWidget.saveWidgetData<String>(_kDayName2, '--');
