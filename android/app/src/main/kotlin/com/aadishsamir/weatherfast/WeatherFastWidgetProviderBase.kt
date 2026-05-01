@@ -23,6 +23,9 @@ abstract class WeatherFastWidgetProviderBase(
         val hourlyConditionSize: Float,
         val dailyNameSize: Float,
         val dailyTempSize: Float,
+        val isTransparent: Boolean,
+        val isTextBlack: Boolean,
+        val customThemeColor: String?,
     )
 
     override fun onUpdate(
@@ -60,6 +63,7 @@ abstract class WeatherFastWidgetProviderBase(
         bindData(context, views, widgetData)
         applySizeLayout(context, views, profile)
         applyResponsiveTextSizes(context, views, profile)
+        applyAppearance(context, views, profile)
 
         views.setOnClickPendingIntent(
             R.id.widget_root,
@@ -67,6 +71,105 @@ abstract class WeatherFastWidgetProviderBase(
         )
 
         appWidgetManager.updateAppWidget(widgetId, views)
+    }
+
+    private fun applyAppearance(context: Context, views: RemoteViews, profile: WidgetSizeProfile) {
+        if (profile.isTransparent) {
+            views.setInt(R.id.widget_root, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_hourly_strip, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_hourly_strip_2, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_hourly_strip_3, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_hourly_strip_4, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_day_card_1, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_day_card_2, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_day_card_3, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_day_card_4, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_day_card_5, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_day_card_6, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+            views.setInt(R.id.widget_day_card_7, "setBackgroundColor", android.graphics.Color.TRANSPARENT)
+        } else {
+            views.setInt(R.id.widget_root, "setBackgroundResource", R.drawable.weather_widget_gradient_background)
+            views.setInt(R.id.widget_hourly_strip, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_hourly_strip_2, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_hourly_strip_3, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_hourly_strip_4, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_day_card_1, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_day_card_2, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_day_card_3, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_day_card_4, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_day_card_5, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_day_card_6, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+            views.setInt(R.id.widget_day_card_7, "setBackgroundResource", R.drawable.weather_widget_card_bg)
+        }
+
+        val brightColor: Int
+        val dimColor: Int
+        val hourlyTempColor: Int
+        
+        var customBright: Int? = null
+        var customDim: Int? = null
+        if (profile.isTransparent && !profile.customThemeColor.isNullOrBlank()) {
+            try {
+                var colorStr = profile.customThemeColor
+                if (!colorStr.startsWith("#")) colorStr = "#$colorStr"
+                val parsedColor = android.graphics.Color.parseColor(colorStr)
+                customBright = parsedColor
+                // Dim the custom color a little for the dimColor (reduce alpha)
+                customDim = android.graphics.Color.argb(
+                    200, // ~78% opacity
+                    android.graphics.Color.red(parsedColor),
+                    android.graphics.Color.green(parsedColor),
+                    android.graphics.Color.blue(parsedColor)
+                )
+            } catch (e: Exception) {
+                // Ignore parse errors, fallback to default
+            }
+        }
+        
+        if (customBright != null && customDim != null) {
+            brightColor = customBright
+            hourlyTempColor = customBright
+            dimColor = customDim
+        } else {
+            brightColor = if (profile.isTextBlack) android.graphics.Color.BLACK else android.graphics.Color.parseColor("#F4FAFF")
+            dimColor = if (profile.isTextBlack) android.graphics.Color.parseColor("#444444") else android.graphics.Color.parseColor("#CADAEA")
+            hourlyTempColor = if (profile.isTextBlack) android.graphics.Color.BLACK else android.graphics.Color.parseColor("#EAF3FB")
+        }
+
+        views.setTextColor(R.id.widget_location, brightColor)
+        views.setTextColor(R.id.widget_condition, dimColor)
+        views.setTextColor(R.id.widget_temp, brightColor)
+        views.setTextColor(R.id.widget_high_low, dimColor)
+
+        views.setTextColor(R.id.widget_hourly_title, brightColor)
+        views.setTextColor(R.id.widget_daily_title, brightColor)
+
+        for (index in 1..24) {
+            val timeId = context.resources.getIdentifier("widget_hour_time_$index", "id", context.packageName)
+            if (timeId != 0) views.setTextColor(timeId, dimColor)
+
+            val tempId = context.resources.getIdentifier("widget_hour_temp_$index", "id", context.packageName)
+            if (tempId != 0) views.setTextColor(tempId, hourlyTempColor)
+
+            val conditionId = context.resources.getIdentifier("widget_hour_condition_$index", "id", context.packageName)
+            if (conditionId != 0) views.setTextColor(conditionId, dimColor)
+        }
+
+        views.setTextColor(R.id.widget_day_name_1, brightColor)
+        views.setTextColor(R.id.widget_day_name_2, brightColor)
+        views.setTextColor(R.id.widget_day_name_3, brightColor)
+        views.setTextColor(R.id.widget_day_name_4, brightColor)
+        views.setTextColor(R.id.widget_day_name_5, brightColor)
+        views.setTextColor(R.id.widget_day_name_6, brightColor)
+        views.setTextColor(R.id.widget_day_name_7, brightColor)
+
+        views.setTextColor(R.id.widget_day_temp_1, hourlyTempColor)
+        views.setTextColor(R.id.widget_day_temp_2, hourlyTempColor)
+        views.setTextColor(R.id.widget_day_temp_3, hourlyTempColor)
+        views.setTextColor(R.id.widget_day_temp_4, hourlyTempColor)
+        views.setTextColor(R.id.widget_day_temp_5, hourlyTempColor)
+        views.setTextColor(R.id.widget_day_temp_6, hourlyTempColor)
+        views.setTextColor(R.id.widget_day_temp_7, hourlyTempColor)
     }
 
     private fun applySizeLayout(context: Context, views: RemoteViews, profile: WidgetSizeProfile) {
@@ -221,55 +324,72 @@ abstract class WeatherFastWidgetProviderBase(
             }
             else -> 0
         }
+        val isTransparent = widgetSettings.isTransparent
+        val isTextBlack = widgetSettings.isTextBlack
+        val customThemeColor = widgetSettings.customThemeColor
+        val bump = if (isTransparent) 2f else 0f
+        val hourlyBump = if (isTransparent) 1f else 0f
 
         return when {
             effectiveHeightDp < 210 -> WidgetSizeProfile(
                 hourlyCardsVisible = hourlyCardsVisible,
                 dailyCardsVisible = dailyCardsVisible,
-                headingSize = 14f,
-                subHeadingSize = 10f,
-                tempSize = 28f,
-                hourlyTimeSize = 9f,
-                hourlyTempSize = 11f,
-                hourlyConditionSize = 8f,
-                dailyNameSize = 11f,
-                dailyTempSize = 11f,
+                headingSize = 14f + bump,
+                subHeadingSize = 10f + bump,
+                tempSize = 28f + bump,
+                hourlyTimeSize = 8f + hourlyBump,
+                hourlyTempSize = 10f + hourlyBump,
+                hourlyConditionSize = 7f + hourlyBump,
+                dailyNameSize = 11f + bump,
+                dailyTempSize = 11f + bump,
+                isTransparent = isTransparent,
+                isTextBlack = isTextBlack,
+                customThemeColor = customThemeColor,
             )
             effectiveHeightDp < 290 -> WidgetSizeProfile(
                 hourlyCardsVisible = hourlyCardsVisible,
                 dailyCardsVisible = dailyCardsVisible,
-                headingSize = 16f,
-                subHeadingSize = 11f,
-                tempSize = 32f,
-                hourlyTimeSize = 10f,
-                hourlyTempSize = 12f,
-                hourlyConditionSize = 9f,
-                dailyNameSize = 12f,
-                dailyTempSize = 12f,
+                headingSize = 16f + bump,
+                subHeadingSize = 11f + bump,
+                tempSize = 32f + bump,
+                hourlyTimeSize = 9f + hourlyBump,
+                hourlyTempSize = 11f + hourlyBump,
+                hourlyConditionSize = 8f + hourlyBump,
+                dailyNameSize = 12f + bump,
+                dailyTempSize = 12f + bump,
+                isTransparent = isTransparent,
+                isTextBlack = isTextBlack,
+                customThemeColor = customThemeColor,
             )
             effectiveHeightDp < 360 -> WidgetSizeProfile(
                 hourlyCardsVisible = hourlyCardsVisible,
                 dailyCardsVisible = dailyCardsVisible,
-                headingSize = 17f,
-                subHeadingSize = 12f,
-                tempSize = 36f,
-                hourlyTimeSize = 11f,
-                hourlyTempSize = 13f,
-                hourlyConditionSize = 10f,
-                dailyNameSize = 13f,
-                dailyTempSize = 13f,
+                headingSize = 17f + bump,
+                subHeadingSize = 12f + bump,
+                tempSize = 36f + bump,
+                hourlyTimeSize = 10f + hourlyBump,
+                hourlyTempSize = 12f + hourlyBump,
+                hourlyConditionSize = 9f + hourlyBump,
+                dailyNameSize = 13f + bump,
+                dailyTempSize = 13f + bump,
+                isTransparent = isTransparent,
+                isTextBlack = isTextBlack,
+                customThemeColor = customThemeColor,
             )
             else -> WidgetSizeProfile(
                 hourlyCardsVisible = hourlyCardsVisible,
                 dailyCardsVisible = dailyCardsVisible,
-                headingSize = 18f,
-                subHeadingSize = 13f,
-                tempSize = 40f,
-                hourlyTimeSize = 12f,
-                hourlyTempSize = 14f,
-                hourlyConditionSize = 11f,
-                dailyNameSize = 14f,
-                dailyTempSize = 14f,
+                headingSize = 18f + bump,
+                subHeadingSize = 13f + bump,
+                tempSize = 40f + bump,
+                hourlyTimeSize = 11f + hourlyBump,
+                hourlyTempSize = 13f + hourlyBump,
+                hourlyConditionSize = 10f + hourlyBump,
+                dailyNameSize = 14f + bump,
+                dailyTempSize = 14f + bump,
+                isTransparent = isTransparent,
+                isTextBlack = isTextBlack,
+                customThemeColor = customThemeColor,
             )
         }
     }
@@ -325,7 +445,8 @@ abstract class WeatherFastWidgetProviderBase(
         for (index in 1..24) {
             val hourText = widgetData.getString("wf_hour_$index", "--") ?: "--"
             val hourTemp = widgetData.getString("wf_hour_temp_$index", "--") ?: "--"
-            val hourCondition = widgetData.getString("wf_hour_condition_$index", "--") ?: "--"
+            val rawHourCondition = widgetData.getString("wf_hour_condition_$index", "--") ?: "--"
+            val hourCondition = rawHourCondition.replace(Regex("(?i)\\s*\\(day\\)"), "").replace(Regex("(?i)\\s*\\(night\\)"), "")
             val hourGlyph = widgetData.getString("wf_hour_icon_$index", glyph) ?: glyph
 
             val cardId = context.resources.getIdentifier(

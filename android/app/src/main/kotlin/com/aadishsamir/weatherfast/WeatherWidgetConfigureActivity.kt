@@ -37,6 +37,12 @@ class WeatherWidgetConfigureActivity : Activity() {
         val hourlyPicker = findViewById<NumberPicker>(R.id.widget_config_hourly_picker)
         val dailySection = findViewById<View>(R.id.widget_config_daily_section)
         val dailyPicker = findViewById<NumberPicker>(R.id.widget_config_daily_picker)
+        val transparentSwitch = findViewById<android.widget.Switch>(R.id.widget_config_transparent_switch)
+        val colorGroup = findViewById<android.widget.RadioGroup>(R.id.widget_config_text_color_group)
+        val colorWhite = findViewById<android.widget.RadioButton>(R.id.widget_config_text_white)
+        val colorBlack = findViewById<android.widget.RadioButton>(R.id.widget_config_text_black)
+        val customColorSection = findViewById<View>(R.id.widget_config_custom_color_section)
+        val customColorInput = findViewById<android.widget.EditText>(R.id.widget_config_custom_color_input)
         val cancelButton = findViewById<Button>(R.id.widget_config_cancel)
         val saveButton = findViewById<Button>(R.id.widget_config_save)
 
@@ -52,6 +58,20 @@ class WeatherWidgetConfigureActivity : Activity() {
         hourlyPicker.maxValue = 24
         hourlyPicker.wrapSelectorWheel = false
         hourlyPicker.value = (existing.hourlyCards ?: defaultHourlyCards(widgetFamily)).coerceIn(0, 24)
+        
+        transparentSwitch.isChecked = existing.isTransparent
+        if (existing.isTextBlack) {
+            colorBlack.isChecked = true
+        } else {
+            colorWhite.isChecked = true
+        }
+        
+        customColorSection.visibility = if (existing.isTransparent) View.VISIBLE else View.GONE
+        customColorInput.setText(existing.customThemeColor ?: "")
+
+        transparentSwitch.setOnCheckedChangeListener { _, isChecked ->
+            customColorSection.visibility = if (isChecked) View.VISIBLE else View.GONE
+        }
 
         if (widgetFamily == "large") {
             dailySection.visibility = View.VISIBLE
@@ -71,7 +91,10 @@ class WeatherWidgetConfigureActivity : Activity() {
         saveButton.setOnClickListener {
             val hourlyCards = hourlyPicker.value
             val dailyCards = if (widgetFamily == "large") dailyPicker.value else 0
-            WeatherWidgetConfigStore.save(this, appWidgetId, hourlyCards, dailyCards)
+            val isTransparent = transparentSwitch.isChecked
+            val isTextBlack = colorBlack.isChecked
+            val customThemeColor = customColorInput.text.toString().takeIf { isTransparent && it.isNotBlank() }
+            WeatherWidgetConfigStore.save(this, appWidgetId, hourlyCards, dailyCards, isTransparent, isTextBlack, customThemeColor)
 
             requestWidgetUpdate(providerInfo?.provider)
 

@@ -3,7 +3,7 @@ description: "WeatherFast"
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 3.2.0
+version: 3.2.1
 
 environment:
   sdk: ^3.10.4
