@@ -1,10 +1,10 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 
 import 'detail_screen.dart';
 import 'services/global_data.dart';
@@ -14,13 +14,17 @@ import 'settings_screen.dart';
 import 'time_utils.dart';
 import 'weather_home.dart';
 
+// Conditional import to prevent Mapbox SDK crashes on Web
+import 'services/mapbox_service_mobile.dart'
+    if (dart.library.html) 'services/mapbox_service_web.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
   String token = dotenv.get('MAPBOX_ACCESS_TOKEN', fallback: '');
   if (token.isNotEmpty) {
-    MapboxOptions.setAccessToken(token);
+    MapboxService.setToken(token);
   }
 
   await TimeUtils.initialize();

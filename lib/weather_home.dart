@@ -13,6 +13,7 @@ import 'ui/daily_range_tile.dart';
 import 'time_utils.dart';
 import 'weather_service.dart';
 import 'weather_map_screen.dart';
+import 'ui/weather_map_snippet.dart';
 
 class WeatherHome extends StatefulWidget {
   const WeatherHome({super.key, required this.onLocationSelected});
