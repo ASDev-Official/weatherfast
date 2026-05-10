@@ -3,6 +3,9 @@ import 'dart:ui';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
+
 import 'detail_screen.dart';
 import 'services/global_data.dart';
 import 'services/preferences_service.dart';
@@ -11,8 +14,15 @@ import 'settings_screen.dart';
 import 'time_utils.dart';
 import 'weather_home.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
+
+  String token = dotenv.get('MAPBOX_ACCESS_TOKEN', fallback: '');
+  if (token.isNotEmpty) {
+    MapboxOptions.setAccessToken(token);
+  }
+
   await TimeUtils.initialize();
   await WidgetRefreshService.initialize();
   GlobalData.useFahrenheit = await PreferencesService.loadUseFahrenheit();

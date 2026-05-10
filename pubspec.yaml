@@ -3,7 +3,7 @@ description: "WeatherFast"
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
-version: 3.2.2
+version: 3.3.0
 
 environment:
   sdk: ^3.10.4
@@ -23,6 +23,8 @@ dependencies:
   shared_preferences: ^2.5.5
   home_widget: ^0.9.1
   workmanager: ^0.7.0
+  flutter_dotenv: ^6.0.1
+  mapbox_maps_flutter: ^2.23.0
 
 dev_dependencies:
   flutter_test:
@@ -36,3 +38,4 @@ flutter:
     - assets/backgrounds/
     - assets/profilepics/
     - assets/appicon/
+    - .env

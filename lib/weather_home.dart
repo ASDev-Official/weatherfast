@@ -12,6 +12,7 @@ import 'ui/open_meteo_attribution.dart';
 import 'ui/daily_range_tile.dart';
 import 'time_utils.dart';
 import 'weather_service.dart';
+import 'weather_map_screen.dart';
 
 class WeatherHome extends StatefulWidget {
   const WeatherHome({super.key, required this.onLocationSelected});
@@ -437,7 +438,28 @@ class _WeatherHomeState extends State<WeatherHome> {
                   if (_weatherData != null &&
                       _weatherData!['sg_regions'] != null)
                     SliverToBoxAdapter(child: _buildSgRegionalForecast()),
-                  SliverToBoxAdapter(child: _buildDailyForecast()),                  SliverToBoxAdapter(child: _buildInsights()),
+                  SliverToBoxAdapter(child: _buildDailyForecast()),
+                  if (_weatherData != null && _weatherData!['location'] != null)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: WeatherMapSnippet(
+                          lat: (_weatherData!['location']['lat'] as num).toDouble(),
+                          lng: (_weatherData!['location']['lon'] as num).toDouble(),
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => WeatherMapScreen(
+                                  initialLat: (_weatherData!['location']['lat'] as num).toDouble(),
+                                  initialLng: (_weatherData!['location']['lon'] as num).toDouble(),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  SliverToBoxAdapter(child: _buildInsights()),
                   if (_weatherData != null)
                     SliverToBoxAdapter(
                       child: OpenMeteoAttribution(

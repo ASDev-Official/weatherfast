@@ -46,4 +46,8 @@ app.*.map.json
 
 # Properties
 android/key.properties
-android/local.properties
+android/local.properties.env
+
+# Environment Variables
+.env
+*/.env
