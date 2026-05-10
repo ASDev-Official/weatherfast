@@ -51,3 +51,6 @@ android/local.properties.env
 # Environment Variables
 .env
 */.env
+
+# Useless Stuff
+web-build.sh
