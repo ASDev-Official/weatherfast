@@ -24,7 +24,7 @@ dependencies:
   home_widget: ^0.9.1
   workmanager: ^0.7.0
   flutter_dotenv: ^6.0.1
-  mapbox_maps_flutter: ^2.23.0
+  mapbox_maps_flutter: ^2.24.2
   url_launcher: ^6.3.2
 
 dev_dependencies:
